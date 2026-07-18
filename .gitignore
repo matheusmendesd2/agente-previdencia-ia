@@ -30,3 +30,10 @@ Thumbs.db
 
 publish/
 *.db
+
+# Modelos treinados (artefatos grandes, gerados localmente)
+finetuning/modelo_ajustado/
+finetuning/modelo_base_temp/
+finetuning/data/
+rag-api/logs/
+rag-api/uploads_tmp/

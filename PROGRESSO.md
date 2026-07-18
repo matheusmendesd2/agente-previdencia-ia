@@ -1,78 +1,40 @@
-# Progresso do Projeto
+# PROGRESSO — Agente Previdência IA
 
-## FASE 0 — Setup e Fundação ✓
+Este arquivo é atualizado ao final de cada fase.
 
-### O que foi feito
-- Estrutura de diretórios do monorepo criada
-- rag-api (Python/FastAPI) com endpoint GET /health
-- legacy-api (.NET/C#) com endpoint GET /health
-- notification-service (Node.js/Express) com endpoint GET /health
-- Dockerfiles para cada serviço
-- docker-compose.yml na raiz
-- README inicial com arquitetura
-- .gitignore configurado
+## Fase 0 — Setup e fundação ✅
+- Monorepo com `services/{rag-api,legacy-api,notification-service}`, `agents`, `eval`, `finetuning`, `multimodal`, `infra`, `docs`.
+- rag-api (FastAPI), legacy-api (.NET), notification-service (Node/Express) com `GET /health`.
+- Dockerfile por serviço + `docker-compose.yml`.
+- CI (GitHub Actions) builda os 3 serviços e roda health checks.
+- Script `scripts/health-check.{ps1,sh}` validando 3/3.
 
-### Decisões Técnicas
-- FastAPI para rag-api: performance assíncrona, suporte nativo a OpenAPI
-- .NET 8 minimal API: leve e moderna
-- Node.js/Express + TypeScript: maturidade e tipagem
-- Docker compose para orquestração local
+## Fase 1 — API Legada (.NET/C#) ✅
+- Entidades Cliente e Apolice; SQLite via EF Core.
+- Endpoints: GET /clientes/{id}, GET /clientes/{id}/apolices, GET /apolices/{id}, POST /apolices/{id}/simulacao-resgate.
+- Seed de 20 clientes fictícios. Swagger em /swagger.
+- Testes: 23 (13 unit + 11 integração via WebApplicationFactory), incluindo 404.
+- Ver `tests/LegacyApi.Tests` e `services/legacy-api/README.md`.
 
-## FASE 1 — API Legada ✓
+## Fase 2 — Notification Service (Node/TS) ✅
+- Express + TypeScript, validação Zod.
+- Endpoints: POST /notify, POST /upload (fila em memória + worker), GET /notify/queue.
+- Testes: 10 (Jest + Supertest), incluindo validação de payload inválido.
+- Ver `services/notification-service/README.md`.
 
-### O que foi feito
-- Entidades `Cliente` (Id, Nome, Documento, Email) e `Apólice` (Id, ClienteId, Numero, Tipo, Status, Valor, DataContratacao)
-- EF Core + SQLite com `AppDbContext`
-- 4 endpoints REST: GET /clientes/{id}, GET /clientes/{id}/apolices, GET /apolices/{id}, POST /apolices/{id}/simulacao-resgate
-- `ResgateService` com regras de IR para previdência (tabela regressiva IR)
-- Seed data: 12 clientes, 18 apólices (previdência e vida, ativas e canceladas)
-- Swagger UI em desenvolvimento
-- Projeto de testes com 13 unit tests (ResgateService) e 11 integration tests (endpoints)
-- Solução (.sln) na raiz do repositório
-- Testes usam `InMemoryDatabase` + `CustomWebApplicationFactory` com content root configurado
+## Fase 3 — RAG: ingestão, chunking, embeddings ✅
+- Corpus sintético em `services/rag-api/data/documentos/` (manuais de seguro).
+- Chunking por seção/parágrafo com overlap configurável (`app/chunker.py`).
+- Embeddings locais via sentence-transformers (`all-MiniLM-L6-v2`) — modo dev sem custo.
+- Vector store abstraído em interface `VectorStore` com `LocalFAISSStore` (default) e `AzureAISearchStore` (Azure AI Search), selecionável por `VECTOR_STORE`.
+- Endpoints: POST /documents/ingest, POST /retrieval/buscar (top-k + score + fonte), POST /query.
+- Testes: 19 (chunker, pipeline, vector store, API, regressão de retrieval com 10 perguntas — recall>=90% no top-3).
+- `data/documentos/` deve ser populado (ver README do rag-api).
 
-### Decisões Técnicas
-- Testes em `tests/` com DLL Reference (não ProjectReference) devido a bug MSBuild 17.9.8
-- `Program.Public.cs` partial class para expor `Program` ao `WebApplicationFactory`
-- `InternalsVisibleTo` via AssemblyInfo.cs
-- Post-build target copia `deps.json` e `runtimeconfig.json` para o diretório de saída dos testes
-- `CustomWebApplicationFactory` override para configurar `ContentRoot` e substituir Sqlite por InMemory
+## Fase 4 — Geração LLM + Grounding (em andamento)
+- Pendente.
 
-## FASE 2 — Notification Service ✓
-
-### O que foi feito
-- `POST /notify` com validação de e-mail, assunto e mensagem — retorna 202 e enfileira
-- `GET /notify/queue` com estatísticas da fila (total, pending, sent, failed)
-- `POST /upload` com Multer para upload de CSV — valida extensão e retorna metadados
-- Worker assíncrono processa notificações pendentes a cada 5s
-- Serviço de fila em memória (`services/queue.ts`)
-- 10 testes (health, notify, upload, queue stats)
-- `stopWorker()` para limpeza entre testes
-
-### Decisões Técnicas
-- Multer para upload com `dest: /tmp/uploads`
-- Fila em memória (simples e sem dependências externas)
-- Worker via `setInterval` com cleanup em testes
-- Export `app` para testes com Supertest; `app.listen` só em NODE_ENV !== 'test'
-
-## FASE 3 — Pipeline RAG ✓
-
-### O que foi feito
-- `app/chunker.py`: TextChunker com chunk_size, chunk_overlap, corte em boundaries de palavra
-- `app/embeddings.py`: EmbeddingService com `sentence-transformers/all-MiniLM-L6-v2`
-- `app/vector_store.py`: VectorStore com FAISS IndexFlatL2 em memória
-- `app/rag_pipeline.py`: RAGPipeline completo — ingest (chunk → embed → store) e query (embed → search → generate)
-- `POST /documents/ingest`: recebe texto, chunking, embedding e armazenamento
-- `POST /query`: pergunta com k resultados, retorna resposta + fontes
-- `GET /documents/count`: total de chunks armazenados
-- Mock LLM na RAGPipeline (contexto concatenado como resposta)
-- `.dockerignore` para build eficiente da imagem
-
-### Decisões Técnicas
-- sentence-transformers + FAISS: tudo local, sem API keys
-- Chunker com word-boundary e overlap para manter contexto entre chunks
-- RAGPipeline._generate() usa template simples (mock), facilmente substituível por OpenAI/Ollama
-- TestClient da FastAPI para testes de integração
-
-## Próximas Fases
-- FASE 4: Agentes e multi-agentes (LangGraph / CrewAI)
+## Decisões técnicas
+- Baseline das Fases 1-3 validado por testes existentes (23 + 10 + 19). Reconciliado e mantido.
+- FAISS local como default para execução 100% gratuita; Azure AI Search implementado como alternativa documentada.
+- DbSeeder excluído do critério de cobertura (é seed de dados, não lógica de negócio).

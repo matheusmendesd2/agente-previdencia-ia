@@ -22,6 +22,11 @@ class RAGPipeline:
             doc_ids.append(doc_id)
         return doc_ids
 
+    def retrieve(self, question: str, k: int = 3) -> list[dict]:
+        """Retrieval puro: retorna os chunks mais próximos com score e metadados (fonte)."""
+        query_embedding = self.embedder.embed(question)
+        return self.store.search(query_embedding, k=k)
+
     def query(self, question: str, k: int = 3) -> dict:
         query_embedding = self.embedder.embed(question)
         results = self.store.search(query_embedding, k=k)

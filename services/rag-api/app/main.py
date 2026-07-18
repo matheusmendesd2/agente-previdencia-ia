@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File, Depends
 from pydantic import BaseModel
 import os
 
@@ -10,6 +10,7 @@ from app.chat import ChatService
 from app.agent import AgentExecutor, MockPlanner
 from app.multiagent import MultiAgentOrchestrator, AttendanceAgent, ComplianceReviewer
 from app.multimodal import build_extractor
+from app.auth import exigir_admin, exigir_usuario, criar_token_teste
 
 app = FastAPI(title="RAG API - Agente Previdência IA")
 
@@ -201,6 +202,44 @@ async def multiagente_trace(trace_id: str):
     if trace is None:
         raise HTTPException(404, "trace não encontrado")
     return trace.__dict__
+
+
+@app.get("/metrics")
+async def metrics(_usuario: dict = Depends(exigir_usuario)):
+    """Dashboard simples: nº de chunks indexados, queries (log), latência/custo acumulados."""
+    try:
+        import json
+        queries = 0
+        latencia = 0.0
+        custo = 0.0
+        caminho = os.path.join("logs", "interacoes.jsonl")
+        if os.path.exists(caminho):
+            with open(caminho, encoding="utf-8") as f:
+                for linha in f:
+                    if linha.strip():
+                        q = json.loads(linha)
+                        queries += 1
+                        latencia += q.get("latencia_ms", 0)
+                        custo += q.get("custo_usd", 0)
+        return {
+            "chunks_indexados": store.count(),
+            "queries": queries,
+            "latencia_media_ms": round(latencia / queries, 2) if queries else 0,
+            "custo_acumulado_usd": round(custo, 4),
+        }
+    except Exception:
+        return {"chunks_indexados": store.count(), "queries": 0, "observacao": "sem log de interações"}
+
+
+@app.post("/admin/reindex")
+async def reindex(_admin: dict = Depends(exigir_admin)):
+    """Apenas admin (RBAC Entra ID) pode re-indexar documentos."""
+    if os.path.isdir("data/documentos"):
+        for nome in os.listdir("data/documentos"):
+            if nome.endswith(".md"):
+                texto = open(os.path.join("data/documentos", nome), encoding="utf-8").read()
+                pipeline.ingest(texto, metadata={"fonte": nome.replace(".md", ""), "documento": nome})
+    return {"status": "reindexado", "chunks": store.count()}
 
 
 @app.post("/multimodal/extrair")

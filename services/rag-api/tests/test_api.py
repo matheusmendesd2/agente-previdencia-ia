@@ -4,6 +4,7 @@ from app.main import app, store, pipeline
 from app.agent import AgentExecutor, MockPlanner
 from app.tools import Tool, ToolResult
 from app.multiagent import MultiAgentOrchestrator, AttendanceAgent, ComplianceReviewer
+from app.auth import criar_token_teste
 
 client = TestClient(app)
 
@@ -138,3 +139,28 @@ def test_multiagente_executar_e_trace(monkeypatch):
     resp2 = client.get(f"/multiagente/traces/{tid}")
     assert resp2.status_code == 200
     assert resp2.json()["id"] == tid
+
+
+def test_metrics_sem_token_retorna_401():
+    resp = client.get("/metrics")
+    assert resp.status_code == 401
+
+
+def test_metrics_com_usuario_retorna_200():
+    token = criar_token_teste(roles=["usuario"])
+    resp = client.get("/metrics", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    assert "chunks_indexados" in resp.json()
+
+
+def test_reindex_usuario_comum_retorna_403():
+    token = criar_token_teste(roles=["usuario"])
+    resp = client.post("/admin/reindex", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 403
+
+
+def test_reindex_admin_retorna_200():
+    token = criar_token_teste(roles=["admin"])
+    resp = client.post("/admin/reindex", headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "reindexado"

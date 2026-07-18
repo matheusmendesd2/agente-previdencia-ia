@@ -80,7 +80,17 @@ Este arquivo é atualizado ao final de cada fase.
 - Teste eval/test_eval.py valida que o script roda e produz relatório com métricas não vazias.
 - Obs: a taxa de recusa de fora-de-escopo depende do threshold de relevância do retriever (mock); sobe com LLM real/relevância mais estrita.
 
-## Fase 10 — Azure IaC, Entra ID auth, dashboard (em andamento)
+## Fase 10 — Azure IaC, Entra ID auth, dashboard ✅
+- infra/main.bicep: Resource Group, Storage Account, Azure AI Search, App Service (rag-api), Function App (ingestão), App Registration (Entra ID) com appRoles usuario/admin (RBAC).
+- infra/ingest-function/ingest_blob.py: Azure Function (Python) para ingestão assíncrona de PDFs do Blob Storage.
+- app/auth.py: middleware JWT Bearer validando tokens do Entra ID (issuer/audience); RBAC usuario vs admin.
+- Endpoint GET /metrics (requer usuário) e POST /admin/reindex (apenas admin).
+- Testes de auth com tokens JWT mock: sem token→401, usuário comum→403 no reindex, admin→200. (rag-api: 43 testes)
+- docs/arquitetura.md com diagrama Mermaid completo; docs/decisoes-tecnicas.md com escolhas.
+- CI: adicionado job validate_bicep (bicep build) e job eval_framework (roda avaliação mock).
+- Obs: `bicep build` não executado localmente (CLI não instalada); validação estática roda no CI (runner com rede).
+
+## Fase 11 — Documentação final e polimento (em andamento)
 - Pendente.
 
 ## Decisões técnicas

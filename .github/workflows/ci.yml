@@ -61,3 +61,28 @@ jobs:
           ./scripts/test_health.sh
       - name: Stop services
         run: docker compose down
+
+  validate_bicep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Bicep CLI
+        run: az bicep install 2>/dev/null || (curl -Lo /usr/local/bin/bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64 && chmod +x /usr/local/bin/bicep)
+      - name: Build Bicep (validação estática)
+        run: bicep build infra/main.bicep
+
+  eval_framework:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: eval
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install rag-api deps (reutilizadas pelo eval)
+        run: pip install -r ../services/rag-api/requirements.txt
+      - name: Run framework de avaliação (modo mock, sem custo)
+        run: python run_eval.py
+

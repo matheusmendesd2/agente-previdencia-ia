@@ -55,5 +55,24 @@
 - Worker via `setInterval` com cleanup em testes
 - Export `app` para testes com Supertest; `app.listen` só em NODE_ENV !== 'test'
 
+## FASE 3 — Pipeline RAG ✓
+
+### O que foi feito
+- `app/chunker.py`: TextChunker com chunk_size, chunk_overlap, corte em boundaries de palavra
+- `app/embeddings.py`: EmbeddingService com `sentence-transformers/all-MiniLM-L6-v2`
+- `app/vector_store.py`: VectorStore com FAISS IndexFlatL2 em memória
+- `app/rag_pipeline.py`: RAGPipeline completo — ingest (chunk → embed → store) e query (embed → search → generate)
+- `POST /documents/ingest`: recebe texto, chunking, embedding e armazenamento
+- `POST /query`: pergunta com k resultados, retorna resposta + fontes
+- `GET /documents/count`: total de chunks armazenados
+- Mock LLM na RAGPipeline (contexto concatenado como resposta)
+- `.dockerignore` para build eficiente da imagem
+
+### Decisões Técnicas
+- sentence-transformers + FAISS: tudo local, sem API keys
+- Chunker com word-boundary e overlap para manter contexto entre chunks
+- RAGPipeline._generate() usa template simples (mock), facilmente substituível por OpenAI/Ollama
+- TestClient da FastAPI para testes de integração
+
 ## Próximas Fases
-- FASE 3: Pipeline RAG (chunking, embeddings, retrieval)
+- FASE 4: Agentes e multi-agentes (LangGraph / CrewAI)

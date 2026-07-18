@@ -63,7 +63,16 @@ Este arquivo é atualizado ao final de cada fase.
 - Fixtures sintéticos em app/documentos_teste (3 docs + sidecars) gerados por app/gerar_fixtures_multimodal.py.
 - Testes: extração dos 3 documentos; imagem inexistente tratada graciosamente; upload via endpoint; rejeição de não-imagem. Total rag-api: 39 testes.
 
-## Fase 8 — Fine-tuning de embeddings (em andamento)
+## Fase 8 — Fine-tuning de embeddings ✅
+- generate_dataset.py: gera pares (pergunta, chunk relevante/irrelevante) do corpus da Fase 3 (45 pares).
+- finetune.py: fine-tuning de all-MiniLM-L6-v2 via contrastive learning (MultipleNegativesRankingLoss).
+- evaluate.py: compara Recall@k e MRR do modelo base vs. ajustado e gera RESULTADOS.md.
+- run_all.py: pipeline reproduzível de ponta a ponta (gerar → treinar → avaliar).
+- RESULTADOS.md: relatório comparativo com números reais (ex.: Recall@3 base=0.756 / ajustado=0.756).
+- Testes (finetuning/tests): formato do dataset; modelo ajustado carrega e gera embeddings dim 384; avaliação roda fim-a-fim. 3 testes passam.
+- Obs: dataset pequeno/sintético → métricas próximas; o processo documentado e reproduzível é o entregável.
+
+## Fase 9 — Framework de avaliação de qualidade (em andamento)
 - Pendente.
 
 ## Decisões técnicas

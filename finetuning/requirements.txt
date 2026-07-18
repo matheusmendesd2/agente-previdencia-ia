@@ -1,0 +1,4 @@
+# Dependências do módulo de fine-tuning de embeddings
+# Requer o venv da rag-api (sentence-transformers, torch, numpy, scikit-learn).
+# Instale no venv da rag-api:
+#   pip install sentence-transformers scikit-learn datasets accelerate

@@ -27,6 +27,7 @@ Thumbs.db
 
 # Temp
 *.log
+.pytest_cache/
 
 publish/
 *.db
@@ -34,6 +35,8 @@ publish/
 # Modelos treinados (artefatos grandes, gerados localmente)
 finetuning/modelo_ajustado/
 finetuning/modelo_base_temp/
+finetuning/checkpoints/
 finetuning/data/
-rag-api/logs/
-rag-api/uploads_tmp/
+services/rag-api/logs/
+services/rag-api/uploads_tmp/
+eval/logs/

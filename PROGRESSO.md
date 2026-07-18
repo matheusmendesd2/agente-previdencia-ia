@@ -90,8 +90,14 @@ Este arquivo é atualizado ao final de cada fase.
 - CI: adicionado job validate_bicep (bicep build) e job eval_framework (roda avaliação mock).
 - Obs: `bicep build` não executado localmente (CLI não instalada); validação estática roda no CI (runner com rede).
 
-## Fase 11 — Documentação final e polimento (em andamento)
-- Pendente.
+## Fase 11 — Documentação final e polimento ✅
+- README.md principal: resumo, diagrama Mermaid, como rodar (Docker e local), tabela de testes por serviço e tabela de rastreabilidade requisito→fase→arquivo, badge de CI, licença.
+- READMEs por componente: services/rag-api, services/legacy-api, services/notification-service, infra, finetuning, eval.
+- LICENSE (MIT).
+- scripts/test_health.sh corrigido para portas reais (8000/8080/3000) e checagem de body status=ok.
+- .gitignore: adiciona .pytest_cache, finetuning/checkpoints, corrige caminhos de logs; logs removidos do versionamento.
+- Regressão final de todos os testes: legacy-api 23, notification-service 10, rag-api 43, eval 1, finetuning 3 — todos verdes.
+- Health check dos 3 serviços validado localmente (3/3 status=ok).
 
 ## Decisões técnicas
 - Baseline das Fases 1-3 validado por testes existentes (23 + 10 + 19). Reconciliado e mantido.

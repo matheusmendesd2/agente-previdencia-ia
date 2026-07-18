@@ -31,8 +31,13 @@ Este arquivo é atualizado ao final de cada fase.
 - Testes: 19 (chunker, pipeline, vector store, API, regressão de retrieval com 10 perguntas — recall>=90% no top-3).
 - `data/documentos/` deve ser populado (ver README do rag-api).
 
-## Fase 4 — Geração LLM + Grounding (em andamento)
-- Pendente.
+## Fase 4 — Geração LLM + Grounding ✅
+- Endpoint POST /chat/perguntar: retrieval + prompt de grounding + histórico.
+- Abstração LLMProvider com LocalMockLLM (default, gratuito/determístico), AzureOpenAILLM, OpenAI, Anthropic (documentados, fallback sem custo).
+- Mitigação de alucinação: se o retrieval não atinge score mínimo (SCORE_MINIMO_GROUNDING, default 0.3), o sistema recusa ("não encontrei essa informação") em vez de inventar.
+- Log de cada interação (pergunta, resposta, fontes, tokens, latência, custo estimado) em logs/interacoes.jsonl.
+- Testes (rag-api): pergunta respondível cita fonte; pergunta fora de escopo recusa; log de custo/latência gravado; endpoints /chat e /retrieval/buscar. Total rag-api: 25 testes.
+- LLM real (Azure/OpenAI/Anthropic) documentado com TODO de teste manual (não depende de credencial nos testes de CI).
 
 ## Decisões técnicas
 - Baseline das Fases 1-3 validado por testes existentes (23 + 10 + 19). Reconciliado e mantido.

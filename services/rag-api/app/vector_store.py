@@ -55,7 +55,9 @@ class LocalFAISSStore(VectorStore):
         distances, indices = self.index.search(query_embedding, k)
         results = []
         for i, idx in enumerate(indices[0]):
-            results.append({**self.documents[idx], "score": float(distances[0][i])})
+            # sentence-transformers gera embeddings ~unitários; converte L2 em similaridade de cosseno.
+            cos_sim = float(1.0 - (distances[0][i] ** 2) / 2.0)
+            results.append({**self.documents[idx], "score": cos_sim})
         return results
 
     def count(self) -> int:

@@ -9,3 +9,6 @@ httpx
 # Opcional: necessário apenas se VECTOR_STORE=azure (Azure AI Search)
 azure-search-documents
 azure-core
+# Opcional: necessário apenas se LLM_PROVIDER=openai / anthropic
+openai
+anthropic

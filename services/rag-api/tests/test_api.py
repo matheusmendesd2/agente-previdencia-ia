@@ -52,3 +52,42 @@ def test_count():
     resp = client.get("/documents/count")
     assert resp.status_code == 200
     assert resp.json()["total_chunks"] > 0
+
+
+def test_chat_pergunta_dentro_do_escopo():
+    store.clear()
+    client.post("/documents/ingest", json={
+        "text": "A previdência possui carência de 6 meses para resgate. O IR segue tabela regressiva.",
+        "metadata": {"fonte": "manual_previdencia"},
+    })
+    resp = client.post("/chat/perguntar", json={"pergunta": "Qual a carência para resgate?"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["recusou"] is False
+    fontes = [f["fonte"] for f in data["fontes"]]
+    assert "manual_previdencia" in fontes
+
+
+def test_chat_pergunta_fora_do_escopo_recusa():
+    store.clear()
+    client.post("/documents/ingest", json={
+        "text": "A previdência possui carência de 6 meses para resgate.",
+        "metadata": {"fonte": "manual_previdencia"},
+    })
+    resp = client.post("/chat/perguntar", json={"pergunta": "Qual a capital da França?"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["recusou"] is True
+
+
+def test_retrieval_buscar_endpoint():
+    store.clear()
+    client.post("/documents/ingest", json={
+        "text": "O seguro de vida cobre morte natural e acidental.",
+        "metadata": {"fonte": "manual_vida"},
+    })
+    resp = client.post("/retrieval/buscar", json={"pergunta": "seguro de vida morte acidental", "k": 1})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["resultados"]) >= 1
+    assert data["resultados"][0]["metadata"]["fonte"] == "manual_vida"

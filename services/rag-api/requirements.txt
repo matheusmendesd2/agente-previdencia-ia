@@ -6,6 +6,7 @@ faiss-cpu
 numpy
 pytest
 httpx
+requests
 # Opcional: necessário apenas se VECTOR_STORE=azure (Azure AI Search)
 azure-search-documents
 azure-core

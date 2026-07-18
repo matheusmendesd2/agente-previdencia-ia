@@ -6,6 +6,7 @@ from app.embeddings import EmbeddingService
 from app.vector_store import build_vector_store
 from app.rag_pipeline import RAGPipeline
 from app.chat import ChatService
+from app.agent import AgentExecutor, MockPlanner
 
 app = FastAPI(title="RAG API - Agente Previdência IA")
 
@@ -14,6 +15,7 @@ embedder = EmbeddingService()
 store = build_vector_store(embedder.dimension)
 pipeline = RAGPipeline(chunker, embedder, store)
 chat_service = ChatService(pipeline)
+agent_executor = AgentExecutor(planner=MockPlanner())
 
 
 class IngestRequest(BaseModel):
@@ -122,3 +124,37 @@ async def perguntar(req: PerguntarRequest):
         custo_usd=log.custo_usd,
         modelo=log.modelo,
     )
+
+
+class ExecutarRequest(BaseModel):
+    instrucao: str
+
+
+class ExecutarResponse(BaseModel):
+    execucao_id: str
+    resposta_final: str
+    concluido: bool
+    motivo_parada: str
+    passos: list
+
+
+@app.post("/agente/executar", response_model=ExecutarResponse)
+async def agente_executar(req: ExecutarRequest):
+    if not req.instrucao.strip():
+        raise HTTPException(400, "instrucao cannot be empty")
+    execucao = agent_executor.run(req.instrucao)
+    return ExecutarResponse(
+        execucao_id=execucao.id,
+        resposta_final=execucao.resposta_final,
+        concluido=execucao.concluido,
+        motivo_parada=execucao.motivo_parada,
+        passos=[p.__dict__ for p in execucao.passos],
+    )
+
+
+@app.get("/agente/execucoes/{exec_id}")
+async def agente_execucao(exec_id: str):
+    execucao = agent_executor.get_execution(exec_id)
+    if execucao is None:
+        raise HTTPException(404, "execução não encontrada")
+    return execucao.__dict__

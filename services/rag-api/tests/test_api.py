@@ -1,6 +1,8 @@
 from fastapi.testclient import TestClient
 
 from app.main import app, store, pipeline
+from app.agent import AgentExecutor, MockPlanner
+from app.tools import Tool, ToolResult
 
 client = TestClient(app)
 
@@ -91,3 +93,31 @@ def test_retrieval_buscar_endpoint():
     data = resp.json()
     assert len(data["resultados"]) >= 1
     assert data["resultados"][0]["metadata"]["fonte"] == "manual_vida"
+
+
+class _FakeTool(Tool):
+    def __init__(self, name, data):
+        self.name = name
+        self.description = name
+        self._data = data
+
+    def run(self, **_):
+        return ToolResult(ok=True, data=self._data, observacao=f"{self.name} ok")
+
+
+def test_agente_executar_e_recuperar_trace(monkeypatch):
+    tools = {
+        "consultar_cliente": _FakeTool("consultar_cliente", {"id": 5}),
+        "consultar_apolices": _FakeTool("consultar_apolices", {"apolices": []}),
+        "simular_resgate": _FakeTool("simular_resgate", {"valorResgate": 10}),
+    }
+    agent = AgentExecutor(tools=tools, planner=MockPlanner(), max_steps=6)
+    monkeypatch.setattr("app.main.agent_executor", agent)
+
+    resp = client.post("/agente/executar", json={"instrucao": "resgate previdencia cliente id 5"})
+    assert resp.status_code == 200
+    exec_id = resp.json()["execucao_id"]
+
+    resp2 = client.get(f"/agente/execucoes/{exec_id}")
+    assert resp2.status_code == 200
+    assert resp2.json()["id"] == exec_id

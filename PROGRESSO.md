@@ -39,6 +39,17 @@ Este arquivo é atualizado ao final de cada fase.
 - Testes (rag-api): pergunta respondível cita fonte; pergunta fora de escopo recusa; log de custo/latência gravado; endpoints /chat e /retrieval/buscar. Total rag-api: 25 testes.
 - LLM real (Azure/OpenAI/Anthropic) documentado com TODO de teste manual (não depende de credencial nos testes de CI).
 
+## Fase 5 — Agente orquestrador (single agent com tools) ✅
+- Loop de agente implementado manualmente (pensar → escolher tool → executar → observar → responder), demonstrando domínio conceitual (sem dependência de framework).
+- Tools: buscar_documentos (RAG), consultar_cliente, consultar_apolices, simular_resgate (legacy-api), enviar_notificacao (notification-service).
+- Endpoint POST /agente/executar (instrução em NL) e GET /agente/execucoes/{id} (trace auditável).
+- Limite de passos (max_steps) para evitar loop infinito; trace de raciocínio persistido em logs/agentes_execucoes.jsonl.
+- MockPlanner determinístico (dev/CI) + LLMPlanner (usa LLM real quando configurado).
+- Testes: sequência esperada de tools (resgate), limite de passos com tool falhando, trace persistido/recuperável, endpoints. Total rag-api: 29 testes.
+
+## Fase 6 — Multiagentes (em andamento)
+- Pendente.
+
 ## Decisões técnicas
 - Baseline das Fases 1-3 validado por testes existentes (23 + 10 + 19). Reconciliado e mantido.
 - FAISS local como default para execução 100% gratuita; Azure AI Search implementado como alternativa documentada.

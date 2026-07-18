@@ -16,9 +16,9 @@ services:
   legacy-api:
     build: ./services/legacy-api
     ports:
-      - "5000:5000"
+      - "8080:8080"
     healthcheck:
-      test: ["CMD", "powershell", "-Command", "try { (Invoke-WebRequest -Uri http://localhost:5000/health).StatusCode -eq 200 } catch { exit 1 }"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3

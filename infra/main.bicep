@@ -91,22 +91,19 @@ resource funcApp 'Microsoft.Web/sites@2023-01-01' = {
   }
 }
 
-// App Registration (Entra ID) — protege os endpoints com auth
-resource appReg 'Microsoft.Graph/applications@v1.0' = {
-  displayName: '${appName}-api'
-  signInAudience: 'AzureADMyOrg'
-  api: {
-    requestedAccessTokenVersion: 2
-    oauth2PermissionScopes: [
-      { id: guid(), type: 'User', value: 'access_as_user', adminConsentDisplayName: 'Acessar API', userConsentDisplayName: 'Acessar API', adminConsentDescription: 'Acesso à API do agente', userConsentDescription: 'Acesso à API do agente' }
-    ]
-  }
-  appRoles: [
-    { id: guid(), allowedMemberTypes: ['User'], description: 'Administrador do sistema', displayName: 'Admin', value: 'admin', isEnabled: true }
-    { id: guid(), allowedMemberTypes: ['User'], description: 'Usuário comum', displayName: 'Usuario', value: 'usuario', isEnabled: true }
-  ]
-}
+// App Registration (Entra ID) — protege os endpoints com auth (RBAC usuario/admin).
+//
+// Observação de arquitetura: o App Registration vive no Microsoft Graph, e NÃO no
+// Azure Resource Manager. Ele não é um recurso ARM/Bicep nativo (declará-lo como
+// 'Microsoft.Graph/applications' exige a extensão experimental de Graph do Bicep).
+// A prática recomendada é provisioná-lo separadamente via Azure CLA/Graph:
+//
+//   az ad app create --display-name "${appName}-api" --sign-in-audience AzureADMyOrg
+//   az ad app update  --id <appId> --app-roles @approles.json   # roles: admin, usuario
+//
+// O client id gerado é injetado no App Service via a app setting ENTRA_CLIENT_ID abaixo,
+// e o rag-api valida os tokens (ver services/rag-api/app/auth.py).
 
 output ragApiUrl string = 'https://${ragAppName}.azurewebsites.net'
 output searchService string = searchName
-output appRegistrationId string = appReg.id
+output tenantId string = tenantId

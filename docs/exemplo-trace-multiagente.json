@@ -1,0 +1,30 @@
+﻿{
+  "id": "6d55de1d",
+  "instrucao": "quanto resgato da previdencia?",
+  "mensagens": [
+    {
+      "agente": "atendimento",
+      "conteudo": "Garanto que voce tera 100% de certeza de rentabilidade garantida de R\\$ 5.000.",
+      "tipo": "resposta"
+    },
+    {
+      "agente": "compliance",
+      "conteudo": "REPROVADO: promessa financeira indevida: 'garanto'; promessa financeira indevida: 'rentabilidade garantida'; promessa financeira indevida: '100% de certeza'; resposta sem citaþÒo de fonte",
+      "tipo": "revisao"
+    },
+    {
+      "agente": "atendimento",
+      "conteudo": "Com base nos documentos, o resgate segue a tabela regressiva. (Fonte: manual_previdencia. Informacao educativa.)",
+      "tipo": "resposta"
+    },
+    {
+      "agente": "compliance",
+      "conteudo": "APROVADO",
+      "tipo": "revisao"
+    }
+  ],
+  "aprovado": true,
+  "resposta_final": "Com base nos documentos, o resgate segue a tabela regressiva. (Fonte: manual_previdencia. Informacao educativa.)",
+  "iteracoes": 2,
+  "timestamp": "2026-07-18T22:35:45Z"
+}

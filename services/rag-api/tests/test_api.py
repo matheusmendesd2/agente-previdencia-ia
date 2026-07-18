@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from app.main import app, store, pipeline
 from app.agent import AgentExecutor, MockPlanner
 from app.tools import Tool, ToolResult
+from app.multiagent import MultiAgentOrchestrator, AttendanceAgent, ComplianceReviewer
 
 client = TestClient(app)
 
@@ -121,3 +122,19 @@ def test_agente_executar_e_recuperar_trace(monkeypatch):
     resp2 = client.get(f"/agente/execucoes/{exec_id}")
     assert resp2.status_code == 200
     assert resp2.json()["id"] == exec_id
+
+
+def test_multiagente_executar_e_trace(monkeypatch):
+    orch = MultiAgentOrchestrator(
+        AttendanceAgent(lambda i, t, p: ("Resposta com fonte. (Fonte: manual_vida)", ["manual_vida"])),
+        ComplianceReviewer(),
+        max_iteracoes=3,
+    )
+    monkeypatch.setattr("app.main.multi_orchestrator", orch)
+    resp = client.post("/multiagente/executar", json={"instrucao": "o que é seguro de vida?"})
+    assert resp.status_code == 200
+    assert resp.json()["aprovado"] is True
+    tid = resp.json()["id"]
+    resp2 = client.get(f"/multiagente/traces/{tid}")
+    assert resp2.status_code == 200
+    assert resp2.json()["id"] == tid

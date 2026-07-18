@@ -7,6 +7,7 @@ from app.vector_store import build_vector_store
 from app.rag_pipeline import RAGPipeline
 from app.chat import ChatService
 from app.agent import AgentExecutor, MockPlanner
+from app.multiagent import MultiAgentOrchestrator, AttendanceAgent, ComplianceReviewer
 
 app = FastAPI(title="RAG API - Agente Previdência IA")
 
@@ -16,6 +17,25 @@ store = build_vector_store(embedder.dimension)
 pipeline = RAGPipeline(chunker, embedder, store)
 chat_service = ChatService(pipeline)
 agent_executor = AgentExecutor(planner=MockPlanner())
+
+
+def _gerador_atendimento(instrucao, tentativa, problemas):
+    """Gera a resposta do Agente de Atendimento via RAG/chat. Nas tentativas seguintes,
+    inclui automaticamente disclaimer e citação de fonte para satisfazer o Compliance."""
+    log = chat_service.perguntar(instrucao)
+    resposta = log.resposta
+    fontes = [f.get("fonte") for f in log.fontes]
+    if tentativa > 1:
+        resposta = resposta + "\n\n(Fonte: documentos internos da seguradora. Esta é uma informação educativa e não constitui recomendação financeira individualizada.)"
+        fontes = fontes or ["documentos internos"]
+    return resposta, fontes
+
+
+multi_orchestrator = MultiAgentOrchestrator(
+    AttendanceAgent(_gerador_atendimento),
+    ComplianceReviewer(),
+    max_iteracoes=3,
+)
 
 
 class IngestRequest(BaseModel):
@@ -158,3 +178,23 @@ async def agente_execucao(exec_id: str):
     if execucao is None:
         raise HTTPException(404, "execução não encontrada")
     return execucao.__dict__
+
+
+class MultiExecutarRequest(BaseModel):
+    instrucao: str
+
+
+@app.post("/multiagente/executar")
+async def multiagente_executar(req: MultiExecutarRequest):
+    if not req.instrucao.strip():
+        raise HTTPException(400, "instrucao cannot be empty")
+    trace = multi_orchestrator.executar(req.instrucao)
+    return trace.__dict__
+
+
+@app.get("/multiagente/traces/{trace_id}")
+async def multiagente_trace(trace_id: str):
+    trace = multi_orchestrator.get_trace(trace_id)
+    if trace is None:
+        raise HTTPException(404, "trace não encontrado")
+    return trace.__dict__

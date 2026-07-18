@@ -47,8 +47,14 @@ Este arquivo é atualizado ao final de cada fase.
 - MockPlanner determinístico (dev/CI) + LLMPlanner (usa LLM real quando configurado).
 - Testes: sequência esperada de tools (resgate), limite de passos com tool falhando, trace persistido/recuperável, endpoints. Total rag-api: 29 testes.
 
-## Fase 6 — Multiagentes (em andamento)
-- Pendente.
+## Fase 6 — Multiagentes ✅
+- Dois agentes especializados em processo único:
+  - Agente de Atendimento: gera a resposta (via RAG/chat) e reformula quando reprovado.
+  - Agente de Compliance/Revisão: valida promessa financeira indevida, citação de fonte e escopo (disclaimer).
+- Ciclo de revisão: atendimento → compliance (reprovado) → reformula → compliance (aprovado). Máx 3 iterações.
+- Endpoint POST /multiagente/executar + GET /multiagente/traces/{id}; trace completo persistido em logs/multiagente_traces.jsonl.
+- Exemplo de trace legível em docs/exemplo-trace-multiagente.json.
+- Testes: reprova 1ª e aprova 2ª tentativa; promessa indevida sempre barrada; trace persistido/consultável; endpoints. Total rag-api: 33 testes.
 
 ## Decisões técnicas
 - Baseline das Fases 1-3 validado por testes existentes (23 + 10 + 19). Reconciliado e mantido.

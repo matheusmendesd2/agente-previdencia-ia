@@ -1,0 +1,38 @@
+{
+  "responsaveis": [
+    {"pergunta": "Qual é a carência para resgate na previdência?", "tipo": "respondivel", "fonte_esperada": "manual_previdencia", "gabarito": "6 meses"},
+    {"pergunta": "O seguro de vida cobre morte acidental?", "tipo": "respondivel", "fonte_esperada": "manual_vida", "gabarito": "sim, dobra o valor"},
+    {"pergunta": "Como funciona o IR no resgate de previdência?", "tipo": "respondivel", "fonte_esperada": "manual_previdencia", "gabarito": "tabela regressiva"},
+    {"pergunta": "O que faz o seguro prestamista?", "tipo": "respondivel", "fonte_esperada": "manual_prestamista", "gabarito": "quita dívida"},
+    {"pergunta": "A indenização do seguro de vida é isenta de IR?", "tipo": "respondivel", "fonte_esperada": "manual_vida", "gabarito": "sim"},
+    {"pergunta": "O resgate parcial é permitido na previdência?", "tipo": "respondivel", "fonte_esperada": "manual_previdencia", "gabarito": "sim"},
+    {"pergunta": "A cobertura do prestamista é limitada ao saldo devedor?", "tipo": "respondivel", "fonte_esperada": "manual_prestamista", "gabarito": "sim"},
+    {"pergunta": "A morte acidental dobra o valor do seguro de vida?", "tipo": "respondivel", "fonte_esperada": "manual_vida", "gabarito": "sim"},
+    {"pergunta": "Qual a carência para o seguro prestamista?", "tipo": "respondivel", "fonte_esperada": "manual_prestamista", "gabarito": "sem carência quando adimplido"},
+    {"pergunta": "O plano de previdência permite portabilidade?", "tipo": "respondivel", "fonte_esperada": "manual_previdencia", "gabarito": "sim"},
+    {"pergunta": "Qual o prêmio do seguro prestamista?", "tipo": "respondivel", "fonte_esperada": "manual_prestamista", "gabarito": "descontado com a parcela"},
+    {"pergunta": "Quantos beneficiários pode ter o seguro de vida?", "tipo": "respondivel", "fonte_esperada": "manual_vida", "gabarito": "pode alterar a qualquer momento"},
+    {"pergunta": "O que é a tabela regressiva de IR?", "tipo": "respondivel", "fonte_esperada": "manual_previdencia", "gabarito": "alíquota cai com o tempo"},
+    {"pergunta": "A previdência tem rendimento composto?", "tipo": "respondivel", "fonte_esperada": "manual_previdencia", "gabarito": "sim, aportes flexíveis"},
+    {"pergunta": "Em caso de invalidez permanente, o prestamista quita a dívida?", "tipo": "respondivel", "fonte_esperada": "manual_prestamista", "gabarito": "sim"},
+    {"pergunta": "Qual o prazo de pagamento da indenização do seguro de vida?", "tipo": "respondivel", "fonte_esperada": "manual_vida", "gabarito": "até 30 dias úteis"},
+    {"pergunta": "Apos 60 meses, qual a alíquota de IR no resgate?", "tipo": "respondivel", "fonte_esperada": "manual_previdencia", "gabarito": "10%"},
+    {"pergunta": "O seguro de vida tem carência para morte natural?", "tipo": "respondivel", "fonte_esperada": "manual_vida", "gabarito": "não quando ativa"},
+    {"pergunta": "O que é a portabilidade da previdência?", "tipo": "respondivel", "fonte_esperada": "manual_previdencia", "gabarito": "migrar sem perder benefício"},
+    {"pergunta": "Quem pode ser beneficiário do seguro de vida?", "tipo": "respondivel", "fonte_esperada": "manual_vida", "gabarito": "indicado pelo segurado"}
+  ],
+  "fora_de_escopo": [
+    {"pergunta": "Qual a capital da França?", "tipo": "fora_escopo"},
+    {"pergunta": "Como investir em Bitcoin?", "tipo": "fora_escopo"},
+    {"pergunta": "Qual a receita do bolo de fubá?", "tipo": "fora_escopo"},
+    {"pergunta": "Quem ganhou a Copa do Mundo de 2022?", "tipo": "fora_escopo"},
+    {"pergunta": "Qual a melhor marca de carro?", "tipo": "fora_escopo"}
+  ],
+  "ambiguas": [
+    {"pergunta": "Quanto eu tenho de apólice?", "tipo": "ambigua"},
+    {"pergunta": "Me ajuda com meu seguro.", "tipo": "ambigua"},
+    {"pergunta": "Fala sobre previdência.", "tipo": "ambigua"},
+    {"pergunta": "Tem cobertura?", "tipo": "ambigua"},
+    {"pergunta": "Qual o valor?", "tipo": "ambigua"}
+  ]
+}

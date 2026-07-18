@@ -72,7 +72,15 @@ Este arquivo é atualizado ao final de cada fase.
 - Testes (finetuning/tests): formato do dataset; modelo ajustado carrega e gera embeddings dim 384; avaliação roda fim-a-fim. 3 testes passam.
 - Obs: dataset pequeno/sintético → métricas próximas; o processo documentado e reproduzível é o entregável.
 
-## Fase 9 — Framework de avaliação de qualidade (em andamento)
+## Fase 9 — Framework de avaliação de qualidade ✅
+- eval/dataset.json: 30 perguntas (20 respondíveis com gabarito/fonte, 5 fora de escopo, 5 ambíguas).
+- eval/run_eval.py: calcula Faithfulness/Groundedness, Answer relevancy, Recall@k do retrieval e Taxa de recusa correta.
+- Usa LLM mock por padrão (CI sem custo); com --completo usa LLM real como juiz.
+- Gera eval/relatorio.md com todas as métricas preenchidas (ex.: Recall@3=95%, Grounded=100%, Recusa=40%).
+- Teste eval/test_eval.py valida que o script roda e produz relatório com métricas não vazias.
+- Obs: a taxa de recusa de fora-de-escopo depende do threshold de relevância do retriever (mock); sobe com LLM real/relevância mais estrita.
+
+## Fase 10 — Azure IaC, Entra ID auth, dashboard (em andamento)
 - Pendente.
 
 ## Decisões técnicas

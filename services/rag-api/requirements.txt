@@ -7,6 +7,9 @@ numpy
 pytest
 httpx
 requests
+Pillow
+# Opcional para OCR real no mode multimodal: pytesseract + Tesseract instalado
+pytesseract
 # Opcional: necessário apenas se VECTOR_STORE=azure (Azure AI Search)
 azure-search-documents
 azure-core

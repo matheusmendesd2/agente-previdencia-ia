@@ -1,5 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from pydantic import BaseModel
+import os
 
 from app.chunker import TextChunker
 from app.embeddings import EmbeddingService
@@ -8,6 +9,7 @@ from app.rag_pipeline import RAGPipeline
 from app.chat import ChatService
 from app.agent import AgentExecutor, MockPlanner
 from app.multiagent import MultiAgentOrchestrator, AttendanceAgent, ComplianceReviewer
+from app.multimodal import build_extractor
 
 app = FastAPI(title="RAG API - Agente Previdência IA")
 
@@ -36,6 +38,7 @@ multi_orchestrator = MultiAgentOrchestrator(
     ComplianceReviewer(),
     max_iteracoes=3,
 )
+extractor = build_extractor()
 
 
 class IngestRequest(BaseModel):
@@ -198,3 +201,24 @@ async def multiagente_trace(trace_id: str):
     if trace is None:
         raise HTTPException(404, "trace não encontrado")
     return trace.__dict__
+
+
+@app.post("/multimodal/extrair")
+async def multimodal_extrair(file: UploadFile = File(...)):
+    """Recebe uma imagem (boleto/carteirinha/apólice) e extrai dados estruturados."""
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(400, "arquivo deve ser uma imagem")
+    os.makedirs("uploads_tmp", exist_ok=True)
+    caminho = os.path.join("uploads_tmp", file.filename or "imagem.png")
+    with open(caminho, "wb") as f:
+        f.write(await file.read())
+    try:
+        resultado = extractor.extrair(caminho)
+    except Exception as e:
+        raise HTTPException(500, f"erro na extração: {e}")
+    return {
+        "sucesso": resultado.sucesso,
+        "dados": resultado.dados,
+        "texto_bruto": resultado.texto_bruto,
+        "observacao": resultado.observacao,
+    }

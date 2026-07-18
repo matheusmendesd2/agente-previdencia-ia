@@ -100,6 +100,24 @@ class EnviarNotificacaoTool(Tool):
         return ToolResult(ok=True, data=resp.json(), observacao="Notificação enfileirada.")
 
 
+class ExtrairImagemTool(Tool):
+    name = "extrair_imagem"
+    description = "Extrai dados estruturados (número da apólice, valor, vencimento) de uma imagem/documento escaneado."
+
+    def __init__(self, extractor=None):
+        self.extractor = extractor
+
+    def run(self, caminho_imagem: str = "", **_):
+        if not caminho_imagem:
+            return ToolResult(ok=False, data={}, observacao="caminho_imagem obrigatório.")
+        extrator = self.extractor
+        if extrator is None:
+            from app.multimodal import build_extractor
+            extrator = build_extractor()
+        res = extrator.extrair(caminho_imagem)
+        return ToolResult(ok=res.sucesso, data=res.dados, observacao=res.observacao)
+
+
 def build_default_tools() -> dict:
     return {
         t.name: t for t in [
@@ -108,5 +126,6 @@ def build_default_tools() -> dict:
             ConsultarApolicesTool(),
             SimularResgateTool(),
             EnviarNotificacaoTool(),
+            ExtrairImagemTool(),
         ]
     }

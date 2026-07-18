@@ -56,6 +56,16 @@ Este arquivo é atualizado ao final de cada fase.
 - Exemplo de trace legível em docs/exemplo-trace-multiagente.json.
 - Testes: reprova 1ª e aprova 2ª tentativa; promessa indevida sempre barrada; trace persistido/consultável; endpoints. Total rag-api: 33 testes.
 
+## Fase 7 — Multimodal ✅
+- Endpoint POST /multimodal/extrair: recebe imagem (boleto/carteirinha/apólice) e devolve JSON estruturado.
+- Extrator abstraído (MultimodalExtractor): LocalMockExtractor (sidecar JSON/OCR opcional via pytesseract) e AzureVisionExtractor (GPT-4o vision, documentado).
+- Integrado como nova tool `extrair_imagem` do Agente de Atendimento.
+- Fixtures sintéticos em app/documentos_teste (3 docs + sidecars) gerados por app/gerar_fixtures_multimodal.py.
+- Testes: extração dos 3 documentos; imagem inexistente tratada graciosamente; upload via endpoint; rejeição de não-imagem. Total rag-api: 39 testes.
+
+## Fase 8 — Fine-tuning de embeddings (em andamento)
+- Pendente.
+
 ## Decisões técnicas
 - Baseline das Fases 1-3 validado por testes existentes (23 + 10 + 19). Reconciliado e mantido.
 - FAISS local como default para execução 100% gratuita; Azure AI Search implementado como alternativa documentada.

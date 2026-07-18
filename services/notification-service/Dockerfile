@@ -5,7 +5,8 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci
 
-COPY tsconfig.json index.ts ./
+COPY tsconfig.json .
+COPY index.ts services/ ./
 RUN npx tsc
 
 FROM node:24-alpine AS runtime

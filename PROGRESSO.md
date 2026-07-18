@@ -38,6 +38,22 @@
 - Post-build target copia `deps.json` e `runtimeconfig.json` para o diretório de saída dos testes
 - `CustomWebApplicationFactory` override para configurar `ContentRoot` e substituir Sqlite por InMemory
 
+## FASE 2 — Notification Service ✓
+
+### O que foi feito
+- `POST /notify` com validação de e-mail, assunto e mensagem — retorna 202 e enfileira
+- `GET /notify/queue` com estatísticas da fila (total, pending, sent, failed)
+- `POST /upload` com Multer para upload de CSV — valida extensão e retorna metadados
+- Worker assíncrono processa notificações pendentes a cada 5s
+- Serviço de fila em memória (`services/queue.ts`)
+- 10 testes (health, notify, upload, queue stats)
+- `stopWorker()` para limpeza entre testes
+
+### Decisões Técnicas
+- Multer para upload com `dest: /tmp/uploads`
+- Fila em memória (simples e sem dependências externas)
+- Worker via `setInterval` com cleanup em testes
+- Export `app` para testes com Supertest; `app.listen` só em NODE_ENV !== 'test'
+
 ## Próximas Fases
-- FASE 2: Serviço Node.js com notificações e upload
 - FASE 3: Pipeline RAG (chunking, embeddings, retrieval)

@@ -3,22 +3,46 @@ name: CI
 on: [push]
 
 jobs:
-  test:
+  test_legacy_api:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: services/legacy-api
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - run: dotnet restore
+      - run: dotnet build --no-restore
+      - run: dotnet test ../../tests/LegacyApi.Tests
 
+  test_notification_service:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/notification-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: services/notification-service/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - name: Build and start services
         run: docker compose up --build -d
-
       - name: Wait for services to be ready
         run: sleep 15
-
       - name: Test health endpoints
         run: |
           chmod +x scripts/test_health.sh
           ./scripts/test_health.sh
-
       - name: Stop services
         run: docker compose down
